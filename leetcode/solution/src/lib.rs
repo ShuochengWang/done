@@ -15,62 +15,50 @@ impl ListNode {
 }
 
 impl Solution {
-    pub fn merge_two_lists(
-        mut list1: Option<Box<ListNode>>,
-        mut list2: Option<Box<ListNode>>,
-    ) -> Option<Box<ListNode>> {
-        let mut dummy = None;
-        let mut cur = &mut dummy;
-        while list1.is_some() && list2.is_some() {
-            if list1.as_ref().unwrap().val <= list2.as_ref().unwrap().val {
-                // move list1 to cur
-                std::mem::swap(cur, &mut list1);
-                // move cur.next to list1
-                std::mem::swap(&mut cur.as_mut().unwrap().next, &mut list1);
+    pub fn partition(mut head: Option<Box<ListNode>>, x: i32) -> Option<Box<ListNode>> {
+        let mut dummy1 = ListNode::new(-1);
+        let mut dummy2 = ListNode::new(-1);
+        let mut r1 = &mut dummy1;
+        let mut r2 = &mut dummy2;
+        while let Some(mut node) = head.take() {
+            head = node.next.take();
+            if node.val < x {
+                r1.next = Some(node);
+                r1 = r1.next.as_mut().unwrap();
             } else {
-                std::mem::swap(cur, &mut list2);
-                std::mem::swap(&mut cur.as_mut().unwrap().next, &mut list2);
+                r2.next = Some(node);
+                r2 = r2.next.as_mut().unwrap();
             }
-            // update cur
-            cur = &mut cur.as_mut().unwrap().next;
         }
-
-        if list1.is_some() {
-            std::mem::swap(cur, &mut list1);
-        }
-        if list2.is_some() {
-            std::mem::swap(cur, &mut list2);
-        }
-
-        dummy
+        r1.next = dummy2.next;
+        dummy1.next
     }
 
-    pub fn merge_two_lists(
-        mut list1: Option<Box<ListNode>>,
-        mut list2: Option<Box<ListNode>>,
-    ) -> Option<Box<ListNode>> {
-        let mut dummy = ListNode::new(-1);
-        let mut cur = &mut dummy;
-        while list1.is_some() && list2.is_some() {
-            if list1.as_ref().unwrap().val <= list2.as_ref().unwrap().val {
-                cur.next = list1.take();
-                cur = cur.next.as_mut().unwrap();
-                list1 = cur.next.take();
+    // Not recommend: need deal with boundary conditions
+    pub fn partition2(mut head: Option<Box<ListNode>>, x: i32) -> Option<Box<ListNode>> {
+        let mut dummy1: Option<Box<ListNode>> = None;
+        let mut dummy2: Option<Box<ListNode>> = None;
+        let mut r1 = &mut dummy1;
+        let mut r2 = &mut dummy2;
+        while head.is_some() {
+            if head.as_ref().unwrap().val < x {
+                if r1.is_some() {
+                    r1 = &mut r1.as_mut().unwrap().next;
+                }
+                std::mem::swap(r1, &mut head);
+                std::mem::swap(&mut r1.as_mut().unwrap().next, &mut head);
             } else {
-                cur.next = list2.take();
-                cur = cur.next.as_mut().unwrap();
-                list2 = cur.next.take();
+                std::mem::swap(r2, &mut head);
+                std::mem::swap(&mut r2.as_mut().unwrap().next, &mut head);
+                r2 = &mut r2.as_mut().unwrap().next;
             }
         }
-
-        if list1.is_some() {
-            cur.next = list1.take();
+        if r1.is_some() {
+            r1.as_mut().unwrap().next = dummy2;
+            dummy1
+        } else {
+            dummy2
         }
-        if list2.is_some() {
-            cur.next = list2.take();
-        }
-
-        dummy.next
     }
 }
 
